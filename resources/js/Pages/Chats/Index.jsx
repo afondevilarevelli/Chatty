@@ -11,6 +11,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { setChats, setChattingUsers } from "@/store/slices/ChatSlice";
 import { ChatService } from "@/services/ChatService";
 import { addNewMessage } from "../../store/slices/ChatSlice";
+import React from "react";
 
 export default function Chat({ auth, chattingUsers, chats }) {
     console.log(chats, chattingUsers);
@@ -23,6 +24,8 @@ export default function Chat({ auth, chattingUsers, chats }) {
 
     const dispatch = useDispatch();
 
+    const messagesEndRef = React.createRef();
+
     useEffect(() => {
         dispatch(setChats(chats));
         dispatch(setChattingUsers(chattingUsers));
@@ -30,6 +33,7 @@ export default function Chat({ auth, chattingUsers, chats }) {
         window.Echo.private(`user.messages.${auth.user.id}`).listen(
             ".NewMessage",
             (message) => {
+                console.log("MESSAGE", message);
                 dispatch(addNewMessage(message));
             }
         );
@@ -38,6 +42,14 @@ export default function Chat({ auth, chattingUsers, chats }) {
             window.Echo.leaveChannel(`user.messages.${auth.user.id}`);
         };
     }, []);
+
+    function scrollToBottomMessages() {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+
+    useEffect(() => {
+        scrollToBottomMessages();
+    }, [selectedUser]);
 
     function onSubmit(ev) {
         ev.preventDefault();
@@ -97,6 +109,7 @@ export default function Chat({ auth, chattingUsers, chats }) {
                                 </div>
                             </div>
                         ))}
+                        <div ref={messagesEndRef} />
                     </div>
 
                     <form
