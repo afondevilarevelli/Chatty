@@ -48,6 +48,7 @@ class NewMessageEvent implements ShouldBroadcast
       'text' => $this->message->text,
       'type' => $this->message->type,
       'attachment' => $this->message->attachment,
+      'created_at' => $this->message->created_at,
     ];
   }
 }
