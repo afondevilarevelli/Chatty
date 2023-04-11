@@ -9,8 +9,8 @@ import {
 import EmojiPicker from "emoji-picker-react";
 import { useDispatch, useSelector } from "react-redux";
 import { setChats, setChattingUsers } from "@/store/slices/ChatSlice";
-import "laravel-echo";
 import { ChatService } from "@/services/ChatService";
+import { addNewMessage } from "../../store/slices/ChatSlice";
 
 export default function Chat({ auth, chattingUsers, chats }) {
     console.log(chats, chattingUsers);
@@ -28,11 +28,15 @@ export default function Chat({ auth, chattingUsers, chats }) {
         dispatch(setChattingUsers(chattingUsers));
 
         window.Echo.private(`user.messages.${auth.user.id}`).listen(
-            `NewMessage.${auth.user.id}`,
-            (e) => {
-                console.log(e);
+            ".NewMessage",
+            (message) => {
+                dispatch(addNewMessage(message));
             }
         );
+
+        return () => {
+            window.Echo.leaveChannel(`user.messages.${auth.user.id}`);
+        };
     }, []);
 
     function onSubmit(ev) {
@@ -41,12 +45,14 @@ export default function Chat({ auth, chattingUsers, chats }) {
 
         console.log(inputMessage);
 
-        ChatService.newMessage(inputMessage, selectedUser.id).then((r) =>
-            console.log(r)
-        );
+        ChatService.newMessage(inputMessage, selectedUser.id)
+            .then((r) => console.log(r))
+            .finally(() => setInputMessage(""));
     }
 
     if (!allChats || !allChattingUsers) return <></>;
+
+    console.log(allChats);
 
     return (
         <ChatLayout auth={auth}>

@@ -4,9 +4,7 @@ namespace App\Events;
 
 use App\Models\Message;
 use App\Models\User;
-use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
@@ -16,15 +14,13 @@ class NewMessageEvent implements ShouldBroadcast
 {
   use Dispatchable, InteractsWithSockets, SerializesModels;
 
-  private User $user;
   public Message $message;
 
   /**
    * Create a new event instance.
    */
-  public function __construct(User $user, Message $message)
+  public function __construct(Message $message)
   {
-    $this->user = $user;
     $this->message = $message;
   }
 
@@ -36,17 +32,22 @@ class NewMessageEvent implements ShouldBroadcast
   public function broadcastOn(): array
   {
     return [
-      new PrivateChannel('NewMessage.' . $this->message->to),
+      new PrivateChannel('user.messages.' . $this->message->to),
     ];
   }
 
   public function broadcastAs(): string
   {
-    return 'NewMessage.' . $this->message->to;
+    return 'NewMessage';
   }
 
-  public function broadcastWhen(): bool
+  public function broadcastWith()
   {
-    return $this->message->to == $this->user->id;
+    return [
+      "from" => User::find($this->message->from),
+      'text' => $this->message->text,
+      'type' => $this->message->type,
+      'attachment' => $this->message->attachment,
+    ];
   }
 }

@@ -28,14 +28,14 @@ class ChatController extends Controller
   public function newMessage(NewMessageRequest $newMessageRequest)
   {
 
-    $user = Auth::user();
+    $userId = Auth::id();
 
     $createdMessage = Message::create([
       ...$newMessageRequest->validationData(),
-      "from" => $user->id,
+      "from" => $userId,
     ]);
 
-    broadcast(new NewMessageEvent($user, $createdMessage))->toOthers();
+    NewMessageEvent::dispatch($createdMessage);
 
     return ["message" => $createdMessage];
   }
