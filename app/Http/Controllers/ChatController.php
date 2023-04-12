@@ -37,6 +37,8 @@ class ChatController extends Controller
 
     NewMessageEvent::dispatch($createdMessage);
 
+    $createdMessage = $createdMessage->load(["from", "to"]);
+
     return ["message" => $createdMessage];
   }
 }

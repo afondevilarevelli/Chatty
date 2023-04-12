@@ -5,24 +5,33 @@ import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
 
 export default function ChatSidebar() {
     const allChattingUsers = useSelector((state) => state.chat.chattingUsers);
+    const chats = useSelector((state) => state.chat.chats);
 
     const [searchText, setSearchText] = useState("");
 
     const [filteredChattingUsers, setFilteredChattingUsers] = useState([]);
 
     useEffect(() => {
-        setFilteredChattingUsers(allChattingUsers);
+        setFilteredChattingUsers(sortByLastMessages(allChattingUsers));
     }, [allChattingUsers]);
 
     const onSubmit = (ev) => {
         ev.preventDefault();
 
         setFilteredChattingUsers(
-            allChattingUsers.filter((u) =>
+            sortByLastMessages(allChattingUsers).filter((u) =>
                 u.name.toLowerCase().includes(searchText.toLowerCase())
             )
         );
     };
+
+    function sortByLastMessages(users) {
+        return [...users].sort(
+            (a, b) =>
+                new Date(chats[b.id][chats[b.id].length - 1].created_at) -
+                new Date(chats[a.id][chats[a.id].length - 1].created_at)
+        );
+    }
 
     return (
         <div className="h-[calc(100vh-theme(space.16))] bg-slate-200 w-0 md:w-full">

@@ -5,22 +5,29 @@ import {
     FaceSmileIcon,
     PaperClipIcon,
     PhotoIcon,
+    ArrowDownIcon,
 } from "@heroicons/react/24/solid";
 import EmojiPicker from "emoji-picker-react";
 import { useDispatch, useSelector } from "react-redux";
 import { setChats, setChattingUsers } from "@/store/slices/ChatSlice";
 import { ChatService } from "@/services/ChatService";
-import { addNewMessage } from "../../store/slices/ChatSlice";
+import {
+    addNewCreatedMessage,
+    addNewReceivedMessage,
+} from "../../store/slices/ChatSlice";
 import React from "react";
 
 export default function Chat({ auth, chattingUsers, chats }) {
     console.log(chats, chattingUsers);
 
     const [inputMessage, setInputMessage] = useState("");
+    const [showUnreadMessagesDisclaimer, setShowUnreadMessagesDisclaimer] =
+        useState(false);
 
     const selectedUser = useSelector((state) => state.chat.selectedUser);
     const allChats = useSelector((state) => state.chat.chats);
     const allChattingUsers = useSelector((state) => state.chat.chattingUsers);
+    const chatsUnread = useSelector((state) => state.chat.chatsUnread);
 
     const dispatch = useDispatch();
 
@@ -33,8 +40,7 @@ export default function Chat({ auth, chattingUsers, chats }) {
         window.Echo.private(`user.messages.${auth.user.id}`).listen(
             ".NewMessage",
             (message) => {
-                console.log("MESSAGE", message);
-                dispatch(addNewMessage(message));
+                dispatch(addNewReceivedMessage(message));
             }
         );
 
@@ -43,8 +49,25 @@ export default function Chat({ auth, chattingUsers, chats }) {
         };
     }, []);
 
+    useEffect(() => {
+        if (selectedUser && unreadMessages() > 0) {
+            setShowUnreadMessagesDisclaimer(true);
+            setTimeout(() => {
+                setShowUnreadMessagesDisclaimer(false);
+            }, 5000);
+        }
+    }, [chatsUnread, selectedUser]);
+
+    useEffect(() => {
+        setShowUnreadMessagesDisclaimer(false);
+    }, [selectedUser]);
+
+    function unreadMessages() {
+        return chatsUnread[selectedUser.id] ? chatsUnread[selectedUser.id] : 0;
+    }
+
     function scrollToBottomMessages() {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+        messagesEndRef.current?.scrollIntoView();
     }
 
     useEffect(() => {
@@ -58,9 +81,21 @@ export default function Chat({ auth, chattingUsers, chats }) {
         console.log(inputMessage);
 
         ChatService.newMessage(inputMessage, selectedUser.id)
-            .then((r) => console.log(r))
+            .then((r) => {
+                dispatch(addNewCreatedMessage(r.data.message));
+            })
             .finally(() => setInputMessage(""));
     }
+
+    useEffect(() => {
+        if (
+            allChats &&
+            selectedUser &&
+            allChats[selectedUser.id][allChats[selectedUser.id].length - 1]
+                .from == auth.user.id
+        )
+            scrollToBottomMessages();
+    }, [allChats, selectedUser]);
 
     if (!allChats || !allChattingUsers) return <></>;
 
@@ -73,7 +108,7 @@ export default function Chat({ auth, chattingUsers, chats }) {
             {!selectedUser ? (
                 <img
                     src="/images/chat-placeholder.jpg"
-                    className="h-full w-full bg-contain"
+                    className="h-full w-full bg-contain relative"
                 ></img>
             ) : (
                 <div className="h-full">
@@ -111,6 +146,17 @@ export default function Chat({ auth, chattingUsers, chats }) {
                         ))}
                         <div ref={messagesEndRef} />
                     </div>
+
+                    {showUnreadMessagesDisclaimer && (
+                        <div className="absolute left-1/2 -translate-y-16 translate-x-1/2 z-40">
+                            <div className="bg-secondary rounded-md py-2 px-4 flex gap-4 animate-bounce">
+                                <ArrowDownIcon className="h-6 w-6 text-white" />
+                                <div className="text-white">
+                                    {unreadMessages()} Unread messages
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                     <form
                         className="h-1/6 w-full bg-violet-200 px-2 flex items-center flex-grow"

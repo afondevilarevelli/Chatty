@@ -19,11 +19,11 @@ class Message extends Model
 
   public function from()
   {
-    $this->belongsTo(User::class, 'from');
+    return $this->belongsTo(User::class, 'from');
   }
 
   public function to()
   {
-    $this->belongsTo(User::class, 'to');
+    return $this->belongsTo(User::class, 'to');
   }
 }
