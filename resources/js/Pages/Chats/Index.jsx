@@ -50,12 +50,8 @@ export default function Chat({ auth, chattingUsers, chats }) {
     }, []);
 
     useEffect(() => {
-        if (selectedUser && unreadMessages() > 0) {
+        if (selectedUser && unreadMessages() > 0)
             setShowUnreadMessagesDisclaimer(true);
-            setTimeout(() => {
-                setShowUnreadMessagesDisclaimer(false);
-            }, 5000);
-        }
     }, [chatsUnread, selectedUser]);
 
     useEffect(() => {
@@ -117,6 +113,14 @@ export default function Chat({ auth, chattingUsers, chats }) {
                         style={{
                             backgroundImage:
                                 "url('/images/chat-wallpapers/planets.jpg')",
+                        }}
+                        onScroll={(e) => {
+                            const reachedBottom =
+                                e.target.scrollHeight - e.target.scrollTop ===
+                                e.target.clientHeight;
+                            if (reachedBottom && showUnreadMessagesDisclaimer) {
+                                setShowUnreadMessagesDisclaimer(false);
+                            }
                         }}
                     >
                         {allChats[selectedUser.id].map((message) => (

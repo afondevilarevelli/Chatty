@@ -17,6 +17,9 @@ use Inertia\Inertia;
 */
 
 Route::get('/', function () {
+  if (Auth::check()) {
+    return redirect('chats');
+  }
   return Inertia::render('Index');
 })->name('index');
 

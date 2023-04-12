@@ -27,7 +27,6 @@ class ChatController extends Controller
 
   public function newMessage(NewMessageRequest $newMessageRequest)
   {
-
     $userId = Auth::id();
 
     $createdMessage = Message::create([
