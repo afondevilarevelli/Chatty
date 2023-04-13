@@ -9,7 +9,11 @@ import {
 } from "@heroicons/react/24/solid";
 import EmojiPicker from "emoji-picker-react";
 import { useDispatch, useSelector } from "react-redux";
-import { setChats, setChattingUsers } from "@/store/slices/ChatSlice";
+import {
+    setChatAsRead,
+    setChats,
+    setChattingUsers,
+} from "@/store/slices/ChatSlice";
 import { ChatService } from "@/services/ChatService";
 import {
     addNewCreatedMessage,
@@ -18,8 +22,6 @@ import {
 import React from "react";
 
 export default function Chat({ auth, chattingUsers, chats }) {
-    console.log(chats, chattingUsers);
-
     const [inputMessage, setInputMessage] = useState("");
     const [showUnreadMessagesDisclaimer, setShowUnreadMessagesDisclaimer] =
         useState(false);
@@ -58,6 +60,20 @@ export default function Chat({ auth, chattingUsers, chats }) {
         setShowUnreadMessagesDisclaimer(false);
     }, [selectedUser]);
 
+    useEffect(() => {
+        scrollToBottomMessages();
+    }, [selectedUser]);
+
+    useEffect(() => {
+        if (
+            allChats &&
+            selectedUser &&
+            allChats[selectedUser.id][allChats[selectedUser.id].length - 1]
+                .from == auth.user.id
+        )
+            scrollToBottomMessages();
+    }, [allChats, selectedUser]);
+
     function unreadMessages() {
         return chatsUnread[selectedUser.id] ? chatsUnread[selectedUser.id] : 0;
     }
@@ -65,10 +81,6 @@ export default function Chat({ auth, chattingUsers, chats }) {
     function scrollToBottomMessages() {
         messagesEndRef.current?.scrollIntoView();
     }
-
-    useEffect(() => {
-        scrollToBottomMessages();
-    }, [selectedUser]);
 
     function onSubmit(ev) {
         ev.preventDefault();
@@ -83,19 +95,17 @@ export default function Chat({ auth, chattingUsers, chats }) {
             .finally(() => setInputMessage(""));
     }
 
-    useEffect(() => {
-        if (
-            allChats &&
-            selectedUser &&
-            allChats[selectedUser.id][allChats[selectedUser.id].length - 1]
-                .from == auth.user.id
-        )
-            scrollToBottomMessages();
-    }, [allChats, selectedUser]);
+    function onScrollChat(e) {
+        const reachedBottom =
+            e.target.scrollHeight - e.target.scrollTop ===
+            e.target.clientHeight;
+        if (reachedBottom && showUnreadMessagesDisclaimer) {
+            setShowUnreadMessagesDisclaimer(false);
+            dispatch(setChatAsRead(selectedUser.id));
+        }
+    }
 
     if (!allChats || !allChattingUsers) return <></>;
-
-    console.log(allChats);
 
     return (
         <ChatLayout auth={auth}>
@@ -114,14 +124,7 @@ export default function Chat({ auth, chattingUsers, chats }) {
                             backgroundImage:
                                 "url('/images/chat-wallpapers/planets.jpg')",
                         }}
-                        onScroll={(e) => {
-                            const reachedBottom =
-                                e.target.scrollHeight - e.target.scrollTop ===
-                                e.target.clientHeight;
-                            if (reachedBottom && showUnreadMessagesDisclaimer) {
-                                setShowUnreadMessagesDisclaimer(false);
-                            }
-                        }}
+                        onScroll={onScrollChat}
                     >
                         {allChats[selectedUser.id].map((message) => (
                             <div
