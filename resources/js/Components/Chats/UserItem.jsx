@@ -45,7 +45,14 @@ export default function UserItem({ user, isContact }) {
         >
             <div className="flex items-center gap-4">
                 <div className="indicator">
-                    <span className="indicator-item badge badge-success border-success-400"></span>
+                    <span
+                        className={
+                            "indicator-item badge" +
+                            (user.online
+                                ? " badge-success border-success-400"
+                                : " badge-ghost border-black")
+                        }
+                    ></span>
                     <div className="avatar">
                         <div className="w-12 rounded-full">
                             <img src={user.image} />

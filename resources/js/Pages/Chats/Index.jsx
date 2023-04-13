@@ -19,6 +19,7 @@ import {
     addNewCreatedMessage,
     addNewReceivedMessage,
     setContacts,
+    setUserStatus,
 } from "../../store/slices/ChatSlice";
 import React from "react";
 
@@ -49,8 +50,26 @@ export default function Chat({ auth, users, chattingUsers, chats }) {
             }
         );
 
+        window.Echo.join(`chat.room`)
+            .here((users) => {
+                users.forEach((u) => {
+                    if (u.id != auth.user.id)
+                        dispatch(setUserStatus({ id: u.id, isOnline: true }));
+                });
+            })
+            .joining((user) => {
+                dispatch(setUserStatus({ id: user.id, isOnline: true }));
+            })
+            .leaving((user) => {
+                dispatch(setUserStatus({ id: user.id, isOnline: false }));
+            })
+            .error((error) => {
+                console.error(error);
+            });
+
         return () => {
-            window.Echo.leaveChannel(`user.messages.${auth.user.id}`);
+            window.Echo.leave(`user.messages.${auth.user.id}`);
+            window.Echo.leave(`chat.room`);
         };
     }, []);
 
@@ -129,9 +148,9 @@ export default function Chat({ auth, users, chattingUsers, chats }) {
                         }}
                         onScroll={onScrollChat}
                     >
-                        {allChats[selectedUser.id].map((message) => (
+                        {allChats[selectedUser.id].map((message, idx) => (
                             <div
-                                key={message.id}
+                                key={idx}
                                 className={`chat ${
                                     auth.user.id == message.from
                                         ? "chat-end"

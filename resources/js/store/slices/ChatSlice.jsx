@@ -24,6 +24,24 @@ export const chatSlice = createSlice({
         setChats: (state, action) => {
             state.chats = action.payload;
         },
+        setUserStatus: (state, action) => {
+            let found = false;
+            state.chattingUsers = state.chattingUsers.map((user) => {
+                if (user.id == action.payload.id) {
+                    found = true;
+                    return { ...user, online: action.payload.isOnline };
+                }
+                return user;
+            });
+
+            if (!found)
+                state.contacts = state.contacts.map((user) => {
+                    if (user.id == action.payload.id) {
+                        return { ...user, online: action.payload.isOnline };
+                    }
+                    return user;
+                });
+        },
         addNewReceivedMessage: (state, action) => {
             const newMessage = action.payload;
 
@@ -81,6 +99,7 @@ export const {
     addNewReceivedMessage,
     addNewCreatedMessage,
     setChatAsRead,
+    setUserStatus,
 } = chatSlice.actions;
 
 export default chatSlice.reducer;
