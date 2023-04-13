@@ -1,18 +1,21 @@
-import ChattingUserItem from "@/Components/Chats/ChattingUserItem";
+import UserItem from "@/Components/Chats/UserItem";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
 
 export default function ChatSidebar() {
+    const contacts = useSelector((state) => state.chat.contacts);
     const allChattingUsers = useSelector((state) => state.chat.chattingUsers);
     const chats = useSelector((state) => state.chat.chats);
 
     const [searchText, setSearchText] = useState("");
 
     const [filteredChattingUsers, setFilteredChattingUsers] = useState([]);
+    const [filteredContacts, setFilteredContacts] = useState([]);
 
     useEffect(() => {
         setFilteredChattingUsers(sortByLastMessages(allChattingUsers));
+        setFilteredContacts(contacts);
     }, [allChattingUsers]);
 
     const onSubmit = (ev) => {
@@ -21,6 +24,12 @@ export default function ChatSidebar() {
         setFilteredChattingUsers(
             sortByLastMessages(allChattingUsers).filter((u) =>
                 u.name.toLowerCase().includes(searchText.toLowerCase())
+            )
+        );
+
+        setFilteredContacts(
+            contacts.filter((c) =>
+                c.name.toLowerCase().includes(searchText.toLowerCase())
             )
         );
     };
@@ -81,7 +90,7 @@ export default function ChatSidebar() {
                 <ul className="menu p-4 w-auto bg-base-100 text-base-content divide-y">
                     {filteredChattingUsers.map((chatUser) => (
                         <li key={chatUser.id}>
-                            <ChattingUserItem chatUser={chatUser} />
+                            <UserItem user={chatUser} isContact={false} />
                         </li>
                     ))}
                 </ul>
@@ -89,9 +98,9 @@ export default function ChatSidebar() {
                 <div className="ml-4 mt-4 mb-2 text-gray-700">CONTACTS</div>
 
                 <ul className="menu p-4 w-auto bg-base-100 text-base-content divide-y">
-                    {filteredChattingUsers.map((chatUser) => (
-                        <li key={chatUser.id}>
-                            <ChattingUserItem chatUser={chatUser} />
+                    {filteredContacts.map((contact) => (
+                        <li key={contact.id}>
+                            <UserItem user={contact} isContact={true} />
                         </li>
                     ))}
                 </ul>

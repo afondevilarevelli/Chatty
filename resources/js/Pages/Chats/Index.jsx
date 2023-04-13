@@ -18,15 +18,17 @@ import { ChatService } from "@/services/ChatService";
 import {
     addNewCreatedMessage,
     addNewReceivedMessage,
+    setContacts,
 } from "../../store/slices/ChatSlice";
 import React from "react";
 
-export default function Chat({ auth, chattingUsers, chats }) {
+export default function Chat({ auth, users, chattingUsers, chats }) {
     const [inputMessage, setInputMessage] = useState("");
     const [showUnreadMessagesDisclaimer, setShowUnreadMessagesDisclaimer] =
         useState(false);
 
     const selectedUser = useSelector((state) => state.chat.selectedUser);
+    const contacts = useSelector((state) => state.chat.contacts);
     const allChats = useSelector((state) => state.chat.chats);
     const allChattingUsers = useSelector((state) => state.chat.chattingUsers);
     const chatsUnread = useSelector((state) => state.chat.chatsUnread);
@@ -38,6 +40,7 @@ export default function Chat({ auth, chattingUsers, chats }) {
     useEffect(() => {
         dispatch(setChats(chats));
         dispatch(setChattingUsers(chattingUsers));
+        dispatch(setContacts(users));
 
         window.Echo.private(`user.messages.${auth.user.id}`).listen(
             ".NewMessage",
@@ -105,7 +108,7 @@ export default function Chat({ auth, chattingUsers, chats }) {
         }
     }
 
-    if (!allChats || !allChattingUsers) return <></>;
+    if (!allChats || !allChattingUsers | !contacts) return <></>;
 
     return (
         <ChatLayout auth={auth}>

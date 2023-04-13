@@ -2,6 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
     selectedUser: null,
+    contacts: [],
     chattingUsers: [],
     chats: [],
     chatsUnread: {}, //Map with <user_id, unread_msgs_count>
@@ -13,6 +14,9 @@ export const chatSlice = createSlice({
     reducers: {
         setSelectedUser: (state, action) => {
             state.selectedUser = action.payload;
+        },
+        setContacts: (state, action) => {
+            state.contacts = action.payload;
         },
         setChattingUsers: (state, action) => {
             state.chattingUsers = action.payload;
@@ -72,6 +76,7 @@ export const chatSlice = createSlice({
 export const {
     setSelectedUser,
     setChattingUsers,
+    setContacts,
     setChats,
     addNewReceivedMessage,
     addNewCreatedMessage,

@@ -18,10 +18,12 @@ class ChatController extends Controller
 
     $chats = $user->getChats();
     $chattingUsers = User::whereIn('id', array_keys($chats))->get();
+    $restOfUsers = User::whereNotIn('id', array_keys($chats))->get();
 
     return Inertia::render('Chats/Index', [
       'chats' => $chats,
-      'chattingUsers' => $chattingUsers
+      'chattingUsers' => $chattingUsers,
+      'users' => $restOfUsers
     ]);
   }
 
