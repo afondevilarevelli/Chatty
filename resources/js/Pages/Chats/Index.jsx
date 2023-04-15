@@ -112,11 +112,11 @@ export default function Chat({ auth, users, chattingUsers, chats }) {
 
         console.log(inputMessage);
 
-        ChatService.newMessage(inputMessage, selectedUser.id)
-            .then((r) => {
-                dispatch(addNewCreatedMessage(r.data.message));
-            })
-            .finally(() => setInputMessage(""));
+        ChatService.newMessage(inputMessage, selectedUser.id).then((r) => {
+            dispatch(addNewCreatedMessage(r.data.message));
+        });
+
+        setInputMessage("");
     }
 
     function isAtBottom() {
