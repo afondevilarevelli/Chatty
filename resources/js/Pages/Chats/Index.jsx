@@ -37,6 +37,7 @@ export default function Chat({ auth, users, chattingUsers, chats }) {
     const dispatch = useDispatch();
 
     const messagesEndRef = React.createRef();
+    const messagesContainerRef = React.createRef();
 
     useEffect(() => {
         dispatch(setChats(chats));
@@ -74,7 +75,7 @@ export default function Chat({ auth, users, chattingUsers, chats }) {
     }, []);
 
     useEffect(() => {
-        if (selectedUser && unreadMessages() > 0)
+        if (selectedUser && unreadMessages() > 0 && !isAtBottom())
             setShowUnreadMessagesDisclaimer(true);
     }, [chatsUnread, selectedUser]);
 
@@ -118,12 +119,17 @@ export default function Chat({ auth, users, chattingUsers, chats }) {
             .finally(() => setInputMessage(""));
     }
 
-    function onScrollChat(e) {
+    function isAtBottom() {
         const reachedBottom =
-            e.target.scrollHeight - e.target.scrollTop ===
-            e.target.clientHeight;
+            messagesContainerRef.current.scrollHeight -
+                messagesContainerRef.current.scrollTop ===
+            messagesContainerRef.current.clientHeight;
 
-        if (reachedBottom && showUnreadMessagesDisclaimer) {
+        return reachedBottom;
+    }
+
+    function onScrollChat() {
+        if (isAtBottom() && showUnreadMessagesDisclaimer) {
             setShowUnreadMessagesDisclaimer(false);
             dispatch(setChatAsRead(selectedUser.id));
         }
@@ -149,6 +155,7 @@ export default function Chat({ auth, users, chattingUsers, chats }) {
                                 "url('/images/chat-wallpapers/planets.jpg')",
                         }}
                         onScroll={onScrollChat}
+                        ref={messagesContainerRef}
                     >
                         {allChats[selectedUser.id].map((message, idx) => (
                             <div
