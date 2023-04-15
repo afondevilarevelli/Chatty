@@ -90,6 +90,7 @@ export default function Chat({ auth, users, chattingUsers, chats }) {
         if (
             allChats &&
             selectedUser &&
+            allChats[selectedUser.id].length > 0 &&
             allChats[selectedUser.id][allChats[selectedUser.id].length - 1]
                 .from == auth.user.id
         )
@@ -121,6 +122,7 @@ export default function Chat({ auth, users, chattingUsers, chats }) {
         const reachedBottom =
             e.target.scrollHeight - e.target.scrollTop ===
             e.target.clientHeight;
+
         if (reachedBottom && showUnreadMessagesDisclaimer) {
             setShowUnreadMessagesDisclaimer(false);
             dispatch(setChatAsRead(selectedUser.id));

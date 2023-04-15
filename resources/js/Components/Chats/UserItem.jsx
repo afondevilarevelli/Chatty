@@ -1,4 +1,8 @@
-import { setChatAsRead, setSelectedUser } from "@/store/slices/ChatSlice";
+import {
+    addNewChat,
+    setChatAsRead,
+    setSelectedUser,
+} from "@/store/slices/ChatSlice";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -14,9 +18,8 @@ export default function UserItem({ user, isContact }) {
     useEffect(() => {
         if (!chats | isContact) return;
 
-        setLastMessageTime(
-            chats[user.id][chats[user.id].length - 1].created_at
-        );
+        const lastMessage = chats[user.id][chats[user.id].length - 1];
+        if (lastMessage) setLastMessageTime(lastMessage.created_at);
     }, [chats]);
 
     function isSelected() {
@@ -29,6 +32,8 @@ export default function UserItem({ user, isContact }) {
 
     function onUserSelected() {
         if (isContact) {
+            dispatch(addNewChat(user));
+            dispatch(setSelectedUser(user));
         } else {
             dispatch(setSelectedUser(user));
             dispatch(setChatAsRead(user.id));
@@ -66,16 +71,25 @@ export default function UserItem({ user, isContact }) {
             {!isContact && (
                 <div className="flex flex-col justify-around gap-4 items-end">
                     {unreadMessages() > 0 && (
-                        <span className="badge">{unreadMessages()}</span>
+                        <span
+                            className={
+                                "badge" +
+                                (!isSelected() ? " animate-bounce" : "")
+                            }
+                        >
+                            {unreadMessages()}
+                        </span>
                     )}
-                    <div
-                        className={
-                            "text-clip text-xs self-end " +
-                            (isSelected() ? "text-white" : "text-slate-400")
-                        }
-                    >
-                        {new Date(lastMessageTime).toLocaleString()}
-                    </div>
+                    {lastMessageTime && (
+                        <div
+                            className={
+                                "text-clip text-xs self-end text-end " +
+                                (isSelected() ? "text-white" : "text-slate-400")
+                            }
+                        >
+                            {new Date(lastMessageTime).toLocaleString()}
+                        </div>
+                    )}
                 </div>
             )}
         </div>

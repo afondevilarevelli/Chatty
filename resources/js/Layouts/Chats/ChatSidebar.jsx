@@ -35,11 +35,16 @@ export default function ChatSidebar() {
     };
 
     function sortByLastMessages(users) {
-        return [...users].sort(
-            (a, b) =>
+        return [...users].sort((a, b) => {
+            const lastMessageA = chats[a.id][chats[a.id].length - 1];
+            const lastMessageB = chats[b.id][chats[b.id].length - 1];
+            if (!lastMessageA) return -1;
+            if (!lastMessageB) return 1;
+            return (
                 new Date(chats[b.id][chats[b.id].length - 1].created_at) -
                 new Date(chats[a.id][chats[a.id].length - 1].created_at)
-        );
+            );
+        });
     }
 
     return (

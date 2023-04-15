@@ -57,13 +57,14 @@ class User extends Authenticatable
   {
     $chats = [];
 
-    $chattingUsers = User::whereRelation('sentMessages', 'to', '=', $this->id)->get();
+    $chattingUsers = User::whereRelation('sentMessages', 'to', '=', $this->id)
+      ->orWhereRelation('receivedMessages', 'from', '=', $this->id)->get();
 
     foreach ($chattingUsers as $user) {
       $chats[$user->id] = $this->getMessagesWithUser($user->id);
     }
 
-    return $chats;
+    return ["chats" => $chats, "chattingUsers" => $chattingUsers];
   }
 
   private function getMessagesWithUser($userId)

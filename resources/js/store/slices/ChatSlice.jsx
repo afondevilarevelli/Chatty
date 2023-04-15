@@ -42,6 +42,13 @@ export const chatSlice = createSlice({
                     return user;
                 });
         },
+        addNewChat: (state, action) => {
+            state.chats = { ...state.chats, [action.payload.id]: [] };
+            state.chattingUsers = [...state.chattingUsers, action.payload];
+            state.contacts = state.contacts.filter(
+                (c) => c.id != action.payload.id
+            );
+        },
         addNewReceivedMessage: (state, action) => {
             const newMessage = action.payload;
 
@@ -53,7 +60,15 @@ export const chatSlice = createSlice({
                     [newMessage.from.id]: [newMessage],
                 };
 
-                state.chattingUsers = [...state.chattingUsers, newMessage.from];
+                if (!state.chattingUsers.some((cu) => cu.id == newMessage.from))
+                    state.chattingUsers = [
+                        ...state.chattingUsers,
+                        newMessage.from,
+                    ];
+
+                state.contacts = state.contacts.filter(
+                    (c) => c.id != newMessage.from
+                );
             }
 
             if (!state.chatsUnread[newMessage.from.id])
@@ -81,7 +96,15 @@ export const chatSlice = createSlice({
                     ],
                 };
 
-                state.chattingUsers = [...state.chattingUsers, newMessage.to];
+                if (!state.chattingUsers.some((cu) => cu.id == newMessage.to))
+                    state.chattingUsers = [
+                        ...state.chattingUsers,
+                        newMessage.to,
+                    ];
+
+                state.contacts = state.contacts.filter(
+                    (c) => c.id != newMessage.to
+                );
             }
         },
         setChatAsRead: (state, action) => {
@@ -96,6 +119,7 @@ export const {
     setChattingUsers,
     setContacts,
     setChats,
+    addNewChat,
     addNewReceivedMessage,
     addNewCreatedMessage,
     setChatAsRead,

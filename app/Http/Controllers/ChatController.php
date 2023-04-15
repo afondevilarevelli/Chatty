@@ -16,9 +16,8 @@ class ChatController extends Controller
   {
     $user = Auth::user();
 
-    $chats = $user->getChats();
-    $chattingUsers = User::whereIn('id', array_keys($chats))->get();
-    $restOfUsers = User::whereNotIn('id', array_keys($chats))->get();
+    ['chats' => $chats, 'chattingUsers' => $chattingUsers] = $user->getChats();
+    $restOfUsers = User::whereNotIn('id', [...array_keys($chats), $user->id])->get();
 
     return Inertia::render('Chats/Index', [
       'chats' => $chats,
